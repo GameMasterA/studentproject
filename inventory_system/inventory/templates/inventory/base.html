@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAJ Inventory</title>
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --panel: #ffffff;
+            --primary: #1f4ed8;
+            --primary-dark: #183ea6;
+            --text: #14213d;
+            --muted: #6b7280;
+            --border: #dfe7f2;
+            --danger: #dc2626;
+            --success: #16a34a;
+        }
+
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); }
+        a { color: var(--primary); text-decoration: none; }
+        .page { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: linear-gradient(180deg, #0f172a 0%, #111827 100%); color: white; padding: 24px 18px; display: flex; flex-direction: column; gap: 18px; }
+        .brand { font-size: 1.6rem; font-weight: 700; margin-bottom: 12px; }
+        .brand span { color: #93c5fd; }
+        .nav-link { display: block; padding: 10px 12px; border-radius: 8px; color: #e5e7eb; margin-bottom: 8px; }
+        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.12); color: white; }
+        .sidebar-footer { margin-top: auto; color: #cbd5e1; font-size: 0.9rem; }
+        .main { flex: 1; display: flex; flex-direction: column; }
+        .header { background: white; padding: 20px 28px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .header .user { color: var(--muted); }
+        .content { padding: 24px 28px 40px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .eyebrow { text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.75rem; color: var(--primary); font-weight: 700; margin: 0 0 6px; }
+        .cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 20px; }
+        .card, .panel, .auth-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04); }
+        .card { padding: 18px; }
+        .card h3 { margin-top: 0; font-size: 0.95rem; color: var(--muted); }
+        .stat { font-size: 1.8rem; font-weight: 700; margin: 8px 0 0; }
+        .panel { padding: 20px; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { border-bottom: 1px solid var(--border); padding: 12px 8px; text-align: left; }
+        .data-table th { color: var(--muted); font-weight: 600; }
+        .btn { display: inline-block; padding: 10px 14px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-secondary { background: #e5e7eb; color: var(--text); }
+        .full-width { width: 100%; }
+        .text-link { font-weight: 600; }
+        .pill { display: inline-block; padding: 5px 10px; border-radius: 999px; font-size: 0.8rem; font-weight: 600; }
+        .pill.success { background: #ecfdf3; color: var(--success); }
+        .pill.danger { background: #fef2f2; color: var(--danger); }
+        .auth-card { max-width: 450px; margin: 40px auto; padding: 30px; }
+        .auth-form label { display: block; margin-top: 12px; font-weight: 600; }
+        .auth-form input, .auth-form select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; margin-top: 6px; }
+        .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        .empty-state { color: var(--muted); padding: 18px 0; }
+        .messages { list-style: none; padding: 0; margin: 0 0 16px; }
+        .messages li { padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; }
+        .messages .success { background: #ecfdf3; color: var(--success); }
+        .messages .error { background: #fef2f2; color: var(--danger); }
+        .messages .info { background: #eff6ff; color: var(--primary); }
+        footer { padding: 20px 28px; border-top: 1px solid var(--border); color: var(--muted); background: white; }
+        @media (max-width: 900px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .form-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 700px) { .page { flex-direction: column; } .sidebar { width: 100%; } .cards { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="page">
+    {% if user.is_authenticated %}
+    <aside class="sidebar">
+        <div class="brand">FAJ <span>Inventory</span></div>
+        <nav>
+            <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" href="{% url 'dashboard' %}">Dashboard</a>
+            <a class="nav-link {% if '/products/' in request.path %}active{% endif %}" href="{% url 'stock' %}">Current stock</a>
+            <a class="nav-link {% if '/products/add/' in request.path %}active{% endif %}" href="{% url 'add_product' %}">Add product</a>
+            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+        </nav>
+        <div class="sidebar-footer">
+            <p>Smart stock control</p>
+            <p>Monitor, restock, and forecast with confidence.</p>
+        </div>
+    </aside>
+    {% endif %}
+
+    <div class="main">
+        {% if user.is_authenticated %}
+        <header class="header">
+            <div>
+                <p class="eyebrow">Professional control center</p>
+                <div class="user">Signed in as {{ user.username }}</div>
+            </div>
+            <a class="btn btn-primary" href="{% url 'add_product' %}">Create product</a>
+        </header>
+        {% endif %}
+
+        <main class="content">
+            {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </main>
+
+        {% if user.is_authenticated %}
+        <footer>
+            <strong>FAJ Inventory</strong> · Precision stock management for modern operations.
+        </footer>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>

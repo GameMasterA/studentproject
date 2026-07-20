@@ -1,0 +1,61 @@
+{% extends 'inventory/base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="eyebrow">Operations center</p>
+        <h1>Inventory dashboard</h1>
+    </div>
+    <a class="btn btn-primary" href="{% url 'add_product' %}">Add product</a>
+</div>
+
+<div class="cards">
+    <div class="card">
+        <h3>Total products</h3>
+        <p class="stat">{{ total_items }}</p>
+    </div>
+    <div class="card">
+        <h3>Units in stock</h3>
+        <p class="stat">{{ total_quantity }}</p>
+    </div>
+    <div class="card">
+        <h3>Inventory value</h3>
+        <p class="stat">${{ total_value }}</p>
+    </div>
+    <div class="card">
+        <h3>Low stock alerts</h3>
+        <p class="stat">{{ low_stock_count }}</p>
+    </div>
+</div>
+
+<div class="panel">
+    <div class="panel-header">
+        <h2>Recently updated items</h2>
+        <a href="{% url 'stock' %}" class="text-link">View all stock</a>
+    </div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>${{ item.price }}</td>
+                <td>{% if item.is_low_stock %}<span class="pill danger">Low stock</span>{% else %}<span class="pill success">Healthy</span>{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="empty-state">No items have been added yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
